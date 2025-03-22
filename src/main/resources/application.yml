@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: "conectabh-service"
+    description: "Um projeto de Salas Coworking para reservas em Belo Horizonte. Desenvolvido por alunos da PUC Minas"
+  datasource:
+    username: user
+    password: password
+    url: jdbc:postgresql://localhost:5432/conectabh
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+
+springdoc:
+  swagger-ui:
+    path: /docs
