@@ -6,7 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class WorkspaceDto {
-    String name;
-    Integer capacity;
-    String location;
+    private String name;
+    private Integer capacity;
+    private String location;
 }
