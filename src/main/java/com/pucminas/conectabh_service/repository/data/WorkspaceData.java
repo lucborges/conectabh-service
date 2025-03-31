@@ -5,7 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -28,7 +30,9 @@ public class WorkspaceData {
     @Column(name = "location")
     private String location;
     @Column(name = "updated_at")
+    @UpdateTimestamp
     private LocalDateTime updatedAt;
     @Column(name = "created_at")
+    @CreationTimestamp
     private LocalDateTime createdAt;
 }
