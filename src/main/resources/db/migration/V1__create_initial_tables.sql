@@ -1,13 +1,13 @@
 CREATE TABLE IF NOT EXISTS users (
     user_id SERIAL PRIMARY KEY,
-    username VARCHAR(255) NOT NULL,
+    full_name VARCHAR(255) NOT NULL,
   	email VARCHAR(255) UNIQUE NOT NULL,
   	password VARCHAR(255) NOT NULL,
   	role VARCHAR(255) NOT NULL,
   	created_at TIMESTAMP NOT NULL
 );
 
-COMMENT ON COLUMN users.username IS 'Nome completo do usuário.';
+COMMENT ON COLUMN users.full_name IS 'Nome completo do usuário.';
 COMMENT ON COLUMN users.email IS 'E-mail do usuário.';
 COMMENT ON COLUMN users.password IS 'Senha armazenada de forma segura.';
 COMMENT ON COLUMN users.role IS 'Tipo de usuário (admin, customer, etc).';
