@@ -1,5 +1,6 @@
 package com.pucminas.conectabh_service.repository.data;
 
+import com.pucminas.conectabh_service.utils.enums.WorkspaceStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,6 +30,9 @@ public class WorkspaceData {
     private Integer capacity;
     @Column(name = "location")
     private String location;
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    private WorkspaceStatus status;
     @Column(name = "updated_at")
     @UpdateTimestamp
     private LocalDateTime updatedAt;

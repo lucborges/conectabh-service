@@ -2,8 +2,8 @@ package com.pucminas.conectabh_service.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +17,8 @@ import java.util.function.Function;
 
 @Service
 public class JwtService {
-    private static final String SECRET_KEY = "3cfa76ef14937c1c0eA519f8fC017a50fcd04a2420f8e8bcd0a7567c272e007b";
+    @Value("${spring.security.jwt.secret-key}")
+    private String SECRET_KEY;
     private static final long EXPIRATION_TIME = 86400000L; // 1 dia em milissegundos
 
     public String extractUsername(String token) {
@@ -75,8 +76,6 @@ public class JwtService {
     }
 
     private Key getSignInKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
-        return Keys.hmacShaKeyFor(keyBytes);
+        return Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
     }
-
 }

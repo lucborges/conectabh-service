@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@RequestMapping("/workspace")
 @RestController
 public class WorkspaceController {
     @Autowired
@@ -15,23 +16,23 @@ public class WorkspaceController {
     @Autowired
     WorkspaceDtoToWorkspace adapter;
 
-    @PostMapping("/workspace/create")
-    public void createWorkspace(WorkspaceDto workspaceDto) {
+    @PostMapping("/create")
+    public void createWorkspace(@RequestBody WorkspaceDto workspaceDto) {
         workspaceUsecase.create(adapter.convert(workspaceDto));
     }
 
-    @GetMapping("/workspace/{id}")
+    @GetMapping("/{id}")
     @ResponseBody
     public ResponseEntity<WorkspaceData> getWorkspace(@PathVariable Integer id) {
         return ResponseEntity.ok(workspaceUsecase.get(id));
     }
 
-    @PutMapping("/workspace/{id}")
+    @PutMapping("/{id}")
     public void updateWorkspace(@PathVariable Integer id, @RequestBody WorkspaceDto workspaceDto) {
         workspaceUsecase.update(id, adapter.convert(workspaceDto));
     }
 
-    @DeleteMapping("/workspace/{id}")
+    @DeleteMapping("/{id}")
     public void deleteWorkspace(@PathVariable Integer id) {
         workspaceUsecase.delete(id);
     }
