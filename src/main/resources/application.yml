@@ -11,6 +11,9 @@ spring:
     hibernate:
       ddl-auto: none
     show-sql: false
+  security:
+    jwt:
+      secret-key: "3cfa76ef14937c1c0eA519f8fC017a50fcd04a2420f8e8bcd0a7567c272e007b1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
 
 springdoc:
   swagger-ui:

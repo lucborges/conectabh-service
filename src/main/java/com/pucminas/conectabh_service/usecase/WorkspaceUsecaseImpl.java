@@ -29,7 +29,6 @@ public class WorkspaceUsecaseImpl implements WorkspaceUsecase {
         } catch (Exception e) {
             logger.error("Error on create workspace {}. err: {}", workspace.getCreatedAt(), e.getMessage());
         }
-
     }
 
     @Override

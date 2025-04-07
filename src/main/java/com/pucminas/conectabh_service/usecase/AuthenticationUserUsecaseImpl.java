@@ -1,6 +1,6 @@
 package com.pucminas.conectabh_service.usecase;
 
-import com.pucminas.conectabh_service.adapter.dataToEntity.UserDataToEntity;
+import com.pucminas.conectabh_service.adapter.dataToEntity.UserDataToUser;
 import com.pucminas.conectabh_service.adapter.entityToData.UserToUserData;
 import com.pucminas.conectabh_service.controller.dto.LoginUserDto;
 import com.pucminas.conectabh_service.controller.dto.RegisterUserDto;
@@ -25,7 +25,7 @@ public class AuthenticationUserUsecaseImpl implements AuthenticationUserUsecase{
     @Autowired
     AuthenticationManager authenticationManager;
     @Autowired
-    UserDataToEntity userDataToEntity;
+    UserDataToUser userDataToEntity;
     @Autowired
     UserToUserData userToUserData;
 

@@ -7,7 +7,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
 @Component
-public class UserDataToEntity implements Adapter<UserData, User> {
+public class UserDataToUser implements Adapter<UserData, User> {
 
     @Override
     public User convert(UserData userData) {

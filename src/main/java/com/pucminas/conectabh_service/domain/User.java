@@ -9,9 +9,9 @@ import lombok.*;
 @NoArgsConstructor
 @EqualsAndHashCode
 public class User {
-    Integer id;
-    String fullName;
-    String email;
-    String password;
-    RoleType role;
+    private Integer id;
+    private String fullName;
+    private String email;
+    private String password;
+    private RoleType role;
 }

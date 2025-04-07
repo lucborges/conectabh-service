@@ -1,10 +1,12 @@
 package com.pucminas.conectabh_service.repository.data;
 
+import com.pucminas.conectabh_service.utils.enums.ReservationStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicUpdate;
 
 import java.time.LocalDateTime;
@@ -23,16 +25,18 @@ public class ReservationData {
     private Integer id;
     @ManyToOne
     @JoinColumn(name = "workspace_id")
-    private WorkspaceData workspaceId;
+    private WorkspaceData workspace;
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private UserData userId;
+    private UserData user;
     @Column(name = "start_time")
     private LocalDateTime startTime;
     @Column(name = "end_time")
     private LocalDateTime endTime;
     @Column(name = "status")
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private ReservationStatus status;
     @Column(name = "created_at")
+    @CreationTimestamp
     private LocalDateTime createdAt;
 }
