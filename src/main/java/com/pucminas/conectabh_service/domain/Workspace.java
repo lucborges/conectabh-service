@@ -1,5 +1,6 @@
 package com.pucminas.conectabh_service.domain;
 
+import com.pucminas.conectabh_service.utils.enums.WorkspaceStatus;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -10,18 +11,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @EqualsAndHashCode
 public class Workspace {
-    Integer id;
-    String name;
-    Integer capacity;
-    String location;
-    LocalDateTime updatedAt;
-    LocalDateTime createdAt;
-
-    public Workspace(String name, Integer capacity, String location, LocalDateTime updatedAt, LocalDateTime createdAt) {
-        this.name = name;
-        this.capacity = capacity;
-        this.location = location;
-        this.updatedAt = updatedAt;
-        this.createdAt = createdAt;
-    }
+    private Integer id;
+    private String name;
+    private Integer capacity;
+    private String location;
+    private WorkspaceStatus status;
+    private LocalDateTime updatedAt;
+    private LocalDateTime createdAt;
 }

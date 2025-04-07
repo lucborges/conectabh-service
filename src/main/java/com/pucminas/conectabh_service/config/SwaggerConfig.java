@@ -13,7 +13,7 @@ public class SwaggerConfig {
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
-                .info(new Info().title("API com JWT").version("1.0").description("Documentação da API protegida com JWT"))
+                .info(new Info().title("Conecta BH - Service").version("1.0").description("API Rest para o gerenciamento de salas coworking em BH."))
                 .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
                 .components(new io.swagger.v3.oas.models.Components()
                         .addSecuritySchemes("bearerAuth", new SecurityScheme()

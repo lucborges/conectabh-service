@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS workspace (
     workspace_name VARCHAR(255) NOT NULL,
     capacity INTEGER NOT NULL,
     location VARCHAR(255) NOT NULL,
+    status VARCHAR(255) NOT NULL,
     updated_at TIMESTAMP NOT NULL,
     created_at TIMESTAMP NOT NULL
 );
@@ -26,6 +27,7 @@ COMMENT ON COLUMN workspace.workspace_name IS 'Nome do espaço.';
 COMMENT ON COLUMN workspace.capacity IS 'Quantidade máxima de pessoas no espaço.';
 COMMENT ON COLUMN workspace.location IS 'Localização do espaço.';
 COMMENT ON COLUMN workspace.updated_at IS 'Data/hora de atualização.';
+COMMENT ON COLUMN workspace.status IS 'Status da workspace (available, reserved, etc).';
 COMMENT ON COLUMN workspace.created_at IS 'Data/hora de criação.';
 
 CREATE TABLE IF NOT EXISTS reservation (
