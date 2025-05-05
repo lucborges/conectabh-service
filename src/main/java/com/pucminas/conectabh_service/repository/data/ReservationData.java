@@ -9,6 +9,7 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicUpdate;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -29,10 +30,8 @@ public class ReservationData {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private UserData user;
-    @Column(name = "start_time")
-    private LocalDateTime startTime;
-    @Column(name = "end_time")
-    private LocalDateTime endTime;
+    @Column(name = "reservation_date")
+    private LocalDate reservationDate;
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
