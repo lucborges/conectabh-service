@@ -23,8 +23,7 @@ public class ReservationToReservationData implements Adapter<Reservation, Reserv
         ReservationData reservationData = new ReservationData();
         reservationData.setWorkspace(workspaceToWorkspaceData.convert(reservation.getWorkspace()));
         reservationData.setUser(userToUserData.convert(reservation.getUser()));
-        reservationData.setStartTime(reservation.getStartTime());
-        reservationData.setEndTime(reservation.getEndTime());
+        reservationData.setReservationDate(reservation.getReservationDate());
         reservationData.setStatus(reservation.getStatus());
 
         return reservationData;

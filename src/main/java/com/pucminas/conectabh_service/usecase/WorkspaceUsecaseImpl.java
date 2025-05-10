@@ -1,5 +1,6 @@
 package com.pucminas.conectabh_service.usecase;
 
+import com.pucminas.conectabh_service.adapter.dataToEntity.WorkspaceDataToWorkspace;
 import com.pucminas.conectabh_service.adapter.entityToData.WorkspaceToWorkspaceData;
 import com.pucminas.conectabh_service.domain.Workspace;
 import com.pucminas.conectabh_service.repository.WorkspaceRepository;
@@ -11,20 +12,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class WorkspaceUsecaseImpl implements WorkspaceUsecase {
     @Autowired
     WorkspaceRepository workspaceRepository;
     @Autowired
-    WorkspaceToWorkspaceData adapter;
+    WorkspaceToWorkspaceData entityToData;
+    @Autowired
+    WorkspaceDataToWorkspace dataToEntity;
 
     private static final Logger logger = LoggerFactory.getLogger(WorkspaceUsecaseImpl.class);
 
     @Override
     public void create(Workspace workspace) {
         try {
-            workspaceRepository.save(adapter.convert(workspace));
+            workspaceRepository.save(entityToData.convert(workspace));
             logger.info("Workspace {} created with success.", workspace.getName());
         } catch (Exception e) {
             logger.error("Error on create workspace {}. err: {}", workspace.getCreatedAt(), e.getMessage());
@@ -32,9 +36,14 @@ public class WorkspaceUsecaseImpl implements WorkspaceUsecase {
     }
 
     @Override
-    public WorkspaceData get(Integer id) {
-        return workspaceRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Workspace not found for id: " + id));
+    public Workspace get(Integer id) {
+        return dataToEntity.convert(workspaceRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Workspace not found for id: " + id)));
+    }
+
+    @Override
+    public List<Workspace> getAll() {
+        return dataToEntity.convert(workspaceRepository.findAll());
     }
 
     @Override

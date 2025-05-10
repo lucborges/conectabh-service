@@ -34,8 +34,7 @@ public class ReservationDtoToReservation implements Adapter<ReservationDto, Rese
         Reservation reservation = new Reservation();
         reservation.setUser(userDataToUser.convert(user));
         reservation.setWorkspace(workspaceDataToWorkspace.convert(workspace));
-        reservation.setStartTime(reservationDto.getStartTime());
-        reservation.setEndTime(reservationDto.getEndTime());
+        reservation.setReservationDate(reservationDto.getReservationDate());
         reservation.setStatus(reservationDto.getStatus());
 
         return reservation;
