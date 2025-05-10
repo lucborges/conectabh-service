@@ -1,11 +1,13 @@
 package com.pucminas.conectabh_service.usecase;
 
 import com.pucminas.conectabh_service.domain.Workspace;
-import com.pucminas.conectabh_service.repository.data.WorkspaceData;
+
+import java.util.List;
 
 public interface WorkspaceUsecase {
     void create(Workspace workspace);
-    WorkspaceData get(Integer id);
+    Workspace get(Integer id);
+    List<Workspace> getAll();
     void update(Integer id, Workspace workspace);
     void delete(Integer id);
 }

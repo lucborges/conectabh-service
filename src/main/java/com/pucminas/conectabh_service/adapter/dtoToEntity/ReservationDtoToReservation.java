@@ -29,13 +29,12 @@ public class ReservationDtoToReservation implements Adapter<ReservationDto, Rese
                 .orElseThrow(() -> new RuntimeException("Workspace not found."));
         UserData user = userRepository.findById(reservationDto.getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found. "));
-
+        
 
         Reservation reservation = new Reservation();
         reservation.setUser(userDataToUser.convert(user));
         reservation.setWorkspace(workspaceDataToWorkspace.convert(workspace));
-        reservation.setStartTime(reservationDto.getStartTime());
-        reservation.setEndTime(reservationDto.getEndTime());
+        reservation.setReservationDate(reservationDto.getReservationDate());
         reservation.setStatus(reservationDto.getStatus());
 
         return reservation;

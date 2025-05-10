@@ -4,14 +4,13 @@ import com.pucminas.conectabh_service.utils.enums.ReservationStatus;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Getter
 @Setter
 public class ReservationDto {
     private Integer workspaceId;
     private Integer userId;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
+    private LocalDate reservationDate;
     private ReservationStatus status;
 }

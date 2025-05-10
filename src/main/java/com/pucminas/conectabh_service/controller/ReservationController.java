@@ -2,11 +2,14 @@ package com.pucminas.conectabh_service.controller;
 
 import com.pucminas.conectabh_service.adapter.dtoToEntity.ReservationDtoToReservation;
 import com.pucminas.conectabh_service.controller.dto.ReservationDto;
+import com.pucminas.conectabh_service.controller.dto.WorkspaceReservationDto;
 import com.pucminas.conectabh_service.domain.Reservation;
 import com.pucminas.conectabh_service.usecase.ReservationUsecase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RequestMapping("/reservation")
 @RestController
@@ -34,5 +37,10 @@ public class ReservationController {
     @PutMapping("/{id}")
     public void updateReservation(@PathVariable Integer id, @RequestBody ReservationDto reservationDto) {
         reservationUsecase.update(id, adapter.convert(reservationDto));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<WorkspaceReservationDto>> getReservationsByWorkspace() {
+        return ResponseEntity.ok(reservationUsecase.getWorkspaceReservations());
     }
 }
