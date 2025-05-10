@@ -12,7 +12,8 @@ import java.util.List;
 public interface ReservationRepository extends JpaRepository<ReservationData, Integer> {
     @Query("SELECT r.workspace.id, r.reservationDate " +
             "FROM ReservationData r " +
-            "WHERE r.status = 'CONFIRMED'")
+            "WHERE r.status = 'CONFIRMED'" +
+            "AND r.reservationDate >= CURRENT_DATE")
     List<Object[]> findConfirmedReservationDatesByWorkspace();
     List<ReservationData> findByWorkspaceIdAndStatus(Integer workspaceId, ReservationStatus status);
 }

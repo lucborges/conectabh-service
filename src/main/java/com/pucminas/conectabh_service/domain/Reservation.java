@@ -4,7 +4,6 @@ import com.pucminas.conectabh_service.utils.enums.ReservationStatus;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
