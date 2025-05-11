@@ -2,11 +2,14 @@ package com.pucminas.conectabh_service.usecase;
 
 import com.pucminas.conectabh_service.adapter.dataToEntity.ReservationDataToReservation;
 import com.pucminas.conectabh_service.adapter.entityToData.ReservationToReservationData;
+import com.pucminas.conectabh_service.controller.dto.UpdateReservationDto;
+import com.pucminas.conectabh_service.controller.dto.WorkspaceDto;
 import com.pucminas.conectabh_service.controller.dto.WorkspaceReservationDto;
+import com.pucminas.conectabh_service.controller.responses.ReservationResponse;
 import com.pucminas.conectabh_service.domain.Reservation;
 import com.pucminas.conectabh_service.repository.ReservationRepository;
-import com.pucminas.conectabh_service.repository.WorkspaceRepository;
 import com.pucminas.conectabh_service.repository.data.ReservationData;
+import com.pucminas.conectabh_service.repository.data.WorkspaceData;
 import com.pucminas.conectabh_service.utils.enums.ReservationStatus;
 import com.pucminas.conectabh_service.utils.enums.WorkspaceStatus;
 import jakarta.persistence.EntityNotFoundException;
@@ -20,13 +23,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class ReservationUsecaseImpl implements ReservationUsecase {
     @Autowired
     ReservationRepository reservationRepository;
-    @Autowired
-    WorkspaceRepository workspaceRepository;
     @Autowired
     ReservationToReservationData reservationToReservationData;
     @Autowired
@@ -61,13 +63,39 @@ public class ReservationUsecaseImpl implements ReservationUsecase {
     }
 
     @Override
-    public Reservation get(Integer id) {
-        return reservationDataToReservation.convert(reservationRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Reservation not found for id: " + id)));
+    public WorkspaceReservationDto getReservationsByWorkspaceId(Integer workspaceId) {
+        List<Object[]> rawData = reservationRepository.findConfirmedReservationDatesByWorkspaceId(workspaceId);
+
+        List<LocalDate> reservationDates = rawData.stream()
+                .map(row -> (LocalDate) row[1])
+                .toList();
+
+        if (reservationDates.isEmpty()) {
+            throw new EntityNotFoundException("No reservations found for workspace id: " + workspaceId);
+        }
+
+        return new WorkspaceReservationDto(workspaceId, reservationDates);
     }
 
     @Override
-    public void update(Integer id, Reservation newReservation) {
+    public List<ReservationResponse> getByUserId(Integer userId) {
+        List<ReservationData> entities = reservationRepository.findUpcomingReservationsByUserId(userId);
+
+        return entities.stream().map(entity -> {
+            WorkspaceData workspace = entity.getWorkspace();
+            WorkspaceDto workspaceDTO = new WorkspaceDto(workspace.getId(), workspace.getName(), workspace.getId(), workspace.getLocation(), workspace.getStatus());
+
+            return new ReservationResponse(
+                    entity.getId(),
+                    workspaceDTO,
+                    entity.getReservationDate(),
+                    entity.getStatus()
+            );
+        }).collect(Collectors.toList());
+    }
+
+    @Override
+    public void update(Integer id, UpdateReservationDto newReservation) {
         ReservationData savedReservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Reservation not found for id: " + id));
 
@@ -87,7 +115,7 @@ public class ReservationUsecaseImpl implements ReservationUsecase {
         }
 
         savedReservation.setReservationDate(newReservation.getReservationDate());
-        savedReservation.setStatus(newReservation.getStatus());
+        savedReservation.setStatus(ReservationStatus.CONFIRMED);
 
         reservationRepository.save(savedReservation);
     }

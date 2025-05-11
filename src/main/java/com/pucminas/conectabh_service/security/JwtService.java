@@ -1,8 +1,12 @@
 package com.pucminas.conectabh_service.security;
 
+import com.pucminas.conectabh_service.adapter.dataToEntity.UserDataToUser;
+import com.pucminas.conectabh_service.domain.User;
+import com.pucminas.conectabh_service.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -17,6 +21,10 @@ import java.util.function.Function;
 
 @Service
 public class JwtService {
+    @Autowired
+    UserRepository userRepository;
+    @Autowired
+    UserDataToUser adapter;
     @Value("${spring.security.jwt.secret-key}")
     private String SECRET_KEY;
     private static final long EXPIRATION_TIME = 86400000L; // 1 dia em milissegundos
@@ -31,7 +39,14 @@ public class JwtService {
     }
 
     public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+        User user = adapter.convert(userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found")));
+
+        Map<String, Object> extraClaims = new HashMap<>();
+        extraClaims.put("id", user.getId());
+        extraClaims.put("role", user.getRole().name());
+
+        return buildToken(extraClaims, userDetails);
     }
 
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
