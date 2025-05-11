@@ -7,9 +7,11 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
+@ToString
 public class RegisterUserDto {
     @NotEmpty(message = "The email address is required.")
     @Email(message = "The email address is invalid.", flags = { Pattern.Flag.CASE_INSENSITIVE })
@@ -20,5 +22,5 @@ public class RegisterUserDto {
     @Size(min = 2, max = 100, message = "The length of full name must be between 2 and 100 characters.")
     private String fullName;
     @NotEmpty(message = "The role type is required.")
-    private RoleType roleType;
+    private RoleType role;
 }
