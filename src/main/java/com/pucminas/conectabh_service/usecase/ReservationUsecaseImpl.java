@@ -19,10 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,7 +34,7 @@ public class ReservationUsecaseImpl implements ReservationUsecase {
     private static final Logger logger = LoggerFactory.getLogger(ReservationUsecaseImpl.class);
     
     @Override
-    public void create(Reservation reservation) throws Exception {
+    public Reservation create(Reservation reservation) throws Exception {
         Integer workspaceId = reservation.getWorkspace().getId();
         LocalDate targetDate = reservation.getReservationDate();
 
@@ -60,6 +57,7 @@ public class ReservationUsecaseImpl implements ReservationUsecase {
         reservation.getWorkspace().setStatus(WorkspaceStatus.RESERVED);
         reservationRepository.save(reservationToReservationData.convert(reservation));
         logger.info("Reservation create with success!");
+        return reservation;
     }
 
     @Override
@@ -145,4 +143,28 @@ public class ReservationUsecaseImpl implements ReservationUsecase {
                 .map(entry -> new WorkspaceReservationDto(entry.getKey(), entry.getValue()))
                 .toList();
     }
+
+    @Override
+    public void updateStatus(Integer id, ReservationStatus newStatus) {
+        ReservationData reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Reserva não encontrada com ID: " + id));
+
+        // Validações adicionais se necessário
+        if (reservation.getStatus() == newStatus) {
+            logger.warn("O status da reserva {} já é {}", id, newStatus);
+            return;
+        }
+
+        // Lógica específica para cancelamento
+        if (newStatus == ReservationStatus.CANCELLED) {
+            reservation.getWorkspace().setStatus(WorkspaceStatus.AVAILABLE);
+            logger.info("Workspace {} liberado devido ao cancelamento",
+                    reservation.getWorkspace().getId());
+        }
+
+        reservation.setStatus(newStatus);
+        reservationRepository.save(reservation);
+        logger.info("Status da reserva {} atualizado para {}", id, newStatus);
+    }
+
 }

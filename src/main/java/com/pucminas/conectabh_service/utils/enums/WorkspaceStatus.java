@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum WorkspaceStatus {
+public enum     WorkspaceStatus {
     AVAILABLE("AVAILABLE"),
     RESERVED("RESERVED");
 

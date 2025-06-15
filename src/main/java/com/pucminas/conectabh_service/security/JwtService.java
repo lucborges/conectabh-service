@@ -1,33 +1,61 @@
 package com.pucminas.conectabh_service.security;
 
-import com.pucminas.conectabh_service.adapter.dataToEntity.UserDataToUser;
 import com.pucminas.conectabh_service.domain.User;
-import com.pucminas.conectabh_service.repository.UserRepository;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
+import com.pucminas.conectabh_service.exception.security.ExpiredTokenException;
+import com.pucminas.conectabh_service.exception.security.InvalidTokenException;
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Autowired;
+import io.jsonwebtoken.security.SignatureException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
-import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+@Slf4j
 @Service
 public class JwtService {
-    @Autowired
-    UserRepository userRepository;
-    @Autowired
-    UserDataToUser adapter;
+
     @Value("${spring.security.jwt.secret-key}")
-    private String SECRET_KEY;
-    private static final long EXPIRATION_TIME = 86400000L; // 1 dia em milissegundos
+    private String secretKey;
+
+    @Value("${spring.security.jwt.expiration}")
+    private long expirationTime;
+
+    public String generateToken(User user) {
+        try {
+            Map<String, Object> claims = new HashMap<>();
+            claims.put("id", user.getId());
+            claims.put("role", user.getRole());   //.name());
+
+            return Jwts.builder()
+                    .claims(claims)
+                    .subject(user.getEmail())
+                    .issuedAt(new Date())
+                    .expiration(new Date(System.currentTimeMillis() + expirationTime))
+                    .signWith(getSignInKey(), Jwts.SIG.HS256)
+                    .compact();
+        } catch (Exception e) {
+            log.error("Error generating token: {}", e.getMessage());
+            throw new RuntimeException("Failed to generate token", e);
+        }
+    }
+
+    public boolean isTokenValid(String token, UserDetails userDetails) {
+        try {
+            final String username = extractUsername(token);
+            return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
+        } catch (JwtException e) {
+            log.warn("Invalid token: {}", e.getMessage());
+            return false;
+        }
+    }
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -38,39 +66,29 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
-    public String generateToken(UserDetails userDetails) {
-        User user = adapter.convert(userRepository.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found")));
-
-        Map<String, Object> extraClaims = new HashMap<>();
-        extraClaims.put("id", user.getId());
-        extraClaims.put("role", user.getRole().name());
-
-        return buildToken(extraClaims, userDetails);
-    }
-
-    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-        return buildToken(extraClaims, userDetails);
-    }
-
-    public long getExpirationTime() {
-        return EXPIRATION_TIME;
-    }
-
-    public String buildToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-        SecretKey key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
-        return Jwts.builder()
-                .claims(extraClaims)
-                .subject(userDetails.getUsername())
-                .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .signWith(key)
-                .compact();
-    }
-
-    public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+    private Claims extractAllClaims(String token) {
+        try {
+            return Jwts.parser()
+                    .verifyWith(getSignInKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+        } catch (ExpiredJwtException e) {
+            log.warn("Expired token: {}", e.getMessage());
+            throw new ExpiredTokenException("Token expirado");
+        } catch (UnsupportedJwtException e) {
+            log.warn("Unsupported JWT: {}", e.getMessage());
+            throw new InvalidTokenException("Formato de token não suportado");
+        } catch (MalformedJwtException e) {
+            log.warn("Malformed JWT: {}", e.getMessage());
+            throw new InvalidTokenException("Token malformado");
+        } catch (SignatureException e) {
+            log.warn("Invalid signature: {}", e.getMessage());
+            throw new InvalidTokenException("Assinatura inválida");
+        } catch (IllegalArgumentException e) {
+            log.warn("JWT claims empty: {}", e.getMessage());
+            throw new InvalidTokenException("Token inválido");
+        }
     }
 
     private boolean isTokenExpired(String token) {
@@ -81,16 +99,17 @@ public class JwtService {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    private Claims extractAllClaims(String token) {
-        return Jwts
-                .parser()
-                .setSigningKey(getSignInKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+    private SecretKey getSignInKey() {
+        try {
+            byte[] keyBytes = Decoders.BASE64.decode(secretKey);
+            return Keys.hmacShaKeyFor(keyBytes);
+        } catch (Exception e) {
+            log.error("Invalid secret key format: {}", e.getMessage());
+            throw new RuntimeException("Invalid JWT secret key configuration", e);
+        }
     }
 
-    private Key getSignInKey() {
-        return Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
+    public long getExpirationTime() {
+        return expirationTime;
     }
 }

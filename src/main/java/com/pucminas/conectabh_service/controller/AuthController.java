@@ -1,53 +1,78 @@
 package com.pucminas.conectabh_service.controller;
 
-import com.pucminas.conectabh_service.adapter.Adapter;
-import com.pucminas.conectabh_service.controller.dto.LoginUserDto;
-import com.pucminas.conectabh_service.controller.dto.RegisterUserDto;
-import com.pucminas.conectabh_service.controller.dto.UserDto;
+import com.pucminas.conectabh_service.controller.dto.*;
 import com.pucminas.conectabh_service.controller.responses.LoginResponse;
 import com.pucminas.conectabh_service.domain.User;
-import com.pucminas.conectabh_service.repository.data.UserData;
+import com.pucminas.conectabh_service.exception.dto.ErrorResponse;
+import com.pucminas.conectabh_service.exception.security.*;
+import com.pucminas.conectabh_service.exception.service.*;
 import com.pucminas.conectabh_service.security.JwtService;
 import com.pucminas.conectabh_service.usecase.AuthenticationUserUsecase;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
-@RequestMapping("/auth")
 @RestController
+@RequestMapping("/auth")
+@RequiredArgsConstructor
 public class AuthController {
-    @Autowired
-    JwtService jwtService;
-    @Autowired
-    AuthenticationUserUsecase authenticationUserUsecase;
-    @Autowired
-    Adapter<User, UserData> adapter;
+
+    private final JwtService jwtService;
+    private final AuthenticationUserUsecase authenticationUserUsecase;
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> authenticate(@RequestBody LoginUserDto loginUserDto) {
-        User authenticatedUser = authenticationUserUsecase.authenticate(loginUserDto);
+    public ResponseEntity<?> authenticate(@Valid @RequestBody LoginUserDto loginUserDto) {
+        try {
+            User authenticatedUser = authenticationUserUsecase.authenticate(loginUserDto);
+            String jwtToken = jwtService.generateToken(authenticatedUser);
 
-        String jwtToken = jwtService.generateToken(adapter.convert(authenticatedUser));
-
-        LoginResponse loginResponse = new LoginResponse();
-        loginResponse.setToken(jwtToken);
-        loginResponse.setExpiresIn(jwtService.getExpirationTime());
-        loginResponse.setUser(authenticationUserUsecase.getUserFromToken(jwtToken));
-
-        return ResponseEntity.ok(loginResponse);
+            return ResponseEntity.ok(LoginResponse.builder()
+                    .token(jwtToken)
+                    .expiresIn(jwtService.getExpirationTime())
+                    .user(authenticationUserUsecase.getUserFromToken(jwtToken))
+                    .build());
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ErrorResponse("Usuário não encontrado", "AUTH-001"));
+        } catch (InvalidCredentialsException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ErrorResponse("Credenciais inválidas", "AUTH-002"));
+        }
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<User> register(@RequestBody RegisterUserDto registerUserDto) {
-        User registeredUser = authenticationUserUsecase.signup(registerUserDto);
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterUserDto registerUserDto) {
+        try {
+            User registeredUser = authenticationUserUsecase.signup(registerUserDto);
 
-        return ResponseEntity.ok(registeredUser);
+            return ResponseEntity.ok(registeredUser);
+        } catch (UserAlreadyExistsException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new ErrorResponse(e.getMessage(), "AUTH-003"));
+        } catch (InvalidUserDataException e) {
+            return ResponseEntity.badRequest()
+                    .body(new ErrorResponse(e.getMessage(), "AUTH-004"));
+        }
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserDto> getCurrentUser(@RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
-        UserDto user = authenticationUserUsecase.getUserFromToken(token);
-        return ResponseEntity.ok(user);
+    public ResponseEntity<?> getCurrentUser(@RequestHeader("Authorization") String authHeader) {
+        try {
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                throw new InvalidTokenException("Token não fornecido");
+            }
+
+            String token = authHeader.substring(7);
+            return ResponseEntity.ok(authenticationUserUsecase.getUserFromToken(token));
+        } catch (InvalidTokenException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ErrorResponse(e.getMessage(), "AUTH-005"));
+        } catch (ExpiredTokenException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ErrorResponse(e.getMessage(), "AUTH-006"));
+        }
     }
 }

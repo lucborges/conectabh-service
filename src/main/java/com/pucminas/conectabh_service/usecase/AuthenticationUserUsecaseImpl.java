@@ -44,7 +44,7 @@ public class AuthenticationUserUsecaseImpl implements AuthenticationUserUsecase{
             user.setFullName(input.getFullName());
             user.setEmail(input.getEmail());
             user.setPassword(passwordEncoder.encode(input.getPassword()));
-            user.setRole(input.getRole());
+            user.setRole("USER");
 
             return userDataToEntity.convert(userRepository.save(userToUserData.convert(user)));
         } catch (Exception e) {

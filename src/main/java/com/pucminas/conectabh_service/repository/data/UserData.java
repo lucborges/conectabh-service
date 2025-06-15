@@ -34,8 +34,8 @@ public class UserData implements UserDetails {
     @Column(name = "password")
     private String password;
     @Column(name = "role")
-    @Enumerated(EnumType.STRING)
-    private RoleType role;
+//    @Enumerated(EnumType.STRING)
+    private String role;
     @Column(name = "created_at")
     @CreationTimestamp
     private LocalDateTime createdAt;
